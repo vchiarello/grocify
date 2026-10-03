@@ -13,5 +13,5 @@ export default function HomeLayout() {
   // Non autenticato (primo avvio, logout, sessione scaduta) → login
   if (!isSignedIn) return <Redirect href="/sign-in" />;
 
-  return <Stack screenOptions={{ headerTitle: "Home" }} />;
+  return <Stack screenOptions={{ headerShown: false }} />;
 }
