@@ -1,6 +1,7 @@
-import { useAuth, useUser } from "@clerk/expo";
-import { Image, Text, TouchableOpacity, View } from "react-native";
-import { colors, ui } from "../../components/theme";
+import { Show, useClerk, useUser } from "@clerk/expo";
+import { UserButton, UserProfileView } from "@clerk/expo/native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 /**
  * Home protetta: corrisponde alla rotta "/".
@@ -8,58 +9,71 @@ import { colors, ui } from "../../components/theme";
  */
 export default function HomeScreen() {
   const { user } = useUser();
-  const { signOut } = useAuth();
+  const { signOut } = useClerk();
 
   if (!user) return null;
 
-  const email = user.primaryEmailAddress?.emailAddress;
-
   return (
-    <View style={[ui.screen, { justifyContent: "flex-start", paddingTop: 40 }]}>
-      <View
-        style={{ flexDirection: "row", alignItems: "center", marginBottom: 28 }}
-      >
-        <Image
-          source={{ uri: user.imageUrl }}
-          style={{ width: 56, height: 56, borderRadius: 28, marginRight: 14 }}
-        />
-        <View style={{ flex: 1 }}>
-          <Text style={[ui.title, { marginBottom: 2 }]}>
-            Ciao{user.firstName ? `, ${user.firstName}` : ""}
-          </Text>
-          <Text style={{ color: colors.muted }}>{email}</Text>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Welcome</Text>
+      <Show when="signed-in">
+        <Text style={styles.text}>
+          Hello {user?.emailAddresses[0].emailAddress}
+        </Text>
+        <View style={styles.buttonContainer}>
+          <Pressable style={styles.button} onPress={() => signOut()}>
+            <Text style={styles.buttonText}>Sign Out</Text>
+          </Pressable>
         </View>
-      </View>
-
-      <View
-        style={{
-          backgroundColor: "#FFFFFF",
-          borderRadius: 12,
-          borderWidth: 1,
-          borderColor: colors.line,
-          padding: 16,
-          marginBottom: 24,
-        }}
-      >
-        <Text style={{ fontWeight: "600", color: colors.ink, marginBottom: 8 }}>
-          Dettagli account
-        </Text>
-        <Text style={{ color: colors.muted, marginBottom: 4 }}>
-          ID utente: {user.id}
-        </Text>
-        <Text style={{ color: colors.muted, marginBottom: 4 }}>
-          Creato il: {user.createdAt?.toLocaleDateString("it-IT")}
-        </Text>
-        <Text style={{ color: colors.muted }}>
-          Ultimo accesso: {user.lastSignInAt?.toLocaleString("it-IT")}
-        </Text>
-      </View>
-
-      {/* signOut() rimuove il token dal secure store: isSignedIn diventa false
-          e il layout (home) reindirizza a /sign-in */}
-      <TouchableOpacity style={ui.button} onPress={() => signOut()}>
-        <Text style={ui.buttonText}>Esci</Text>
-      </TouchableOpacity>
-    </View>
+        <View
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            overflow: "hidden",
+          }}
+        >
+          <UserButton />
+        </View>
+        <UserProfileView style={{ flex: 1 }} />
+      </Show>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1 /* dice che il container occupa tutto lo spazio disponibile e ogni elemento occuperà lo stesso spazio */,
+    justifyContent:
+      "flex-start" /* allinea gli elementi all'inizio del contenitore lungo l'asse principale (verticale) */,
+    flexDirection:
+      "column" /* imposta la direzione degli elementi all'interno del contenitore come colonna (verticale) */,
+  },
+  title: {
+    textAlign: "center",
+    fontSize: 26,
+    fontWeight: "bold",
+  },
+  text: {
+    fontSize: 16,
+    fontWeight: "normal",
+    textAlign: "left",
+    padding: 10,
+  },
+  buttonContainer: {
+    width: "100%",
+    alignItems: "center",
+  },
+  button: {
+    backgroundColor: "#000",
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    alignItems: "center",
+    width: 150,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+});
