@@ -8,7 +8,6 @@ import { Redirect, Stack } from "expo-router";
  */
 export default function AuthLayout() {
   const { isLoaded, isSignedIn } = useAuth();
-  console.log("[(Auth)/_layout] ");
 
   // Clerk sta ancora leggendo il token dallo storage: non mostriamo nulla
   if (!isLoaded) return null;
