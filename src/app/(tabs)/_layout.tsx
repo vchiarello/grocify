@@ -1,7 +1,9 @@
+import { useGroceryStore } from "@/store/grocery-store";
 import { useAuth } from "@clerk/expo";
 import { Redirect } from "expo-router";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { useColorScheme } from "nativewind";
+import { useEffect } from "react";
 
 /**
  * Layout del gruppo (home): è la "guardia" dell'area protetta.
@@ -10,21 +12,20 @@ import { useColorScheme } from "nativewind";
 export default function TabsLayout() {
   const { isLoaded, isSignedIn } = useAuth();
 
+  const { loadItems, items } = useGroceryStore();
+
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
   const tabTintColor = isDark ? "hsl(142, 70%, 54%)" : "hsl(147, 75%, 33%)";
-  console.log(
-    "[(Tabs)/_layout] colorScheme",
-    colorScheme,
-    "isDark",
-    isDark,
-    "tabTintColor",
-    tabTintColor,
-  );
+
   if (!isLoaded) return null;
 
   // Non autenticato (primo avvio, logout, sessione scaduta) → login
   if (!isSignedIn) return <Redirect href="/sign-in" />;
+
+  useEffect(() => {
+    loadItems();
+  }, []);
 
   return (
     <NativeTabs tintColor={tabTintColor}>
