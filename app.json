@@ -22,7 +22,7 @@
       "package": "com.vito.chiarello.grocify"
     },
     "web": {
-      "output": "static",
+      "output": "server",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
