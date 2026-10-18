@@ -51,6 +51,7 @@ export const updateGroceryItemQuantity = async (
   id: string,
   quantity: number,
 ) => {
+  console.log("updateGroceryItemQuantity", id, quantity);
   const items = await db
     .update(groceryItems)
     .set({

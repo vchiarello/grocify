@@ -27,7 +27,7 @@ export async function PATCH(request: Request, { id }: { id: string }) {
   try {
     const body = await request.json();
     const item = body.quantity
-      ? await updateGroceryItemQuantity(id, body)
+      ? await updateGroceryItemQuantity(id, body.quantity)
       : await setGroceryItemPurchased({
           id,
           isPurchased: body.purchased ?? true,

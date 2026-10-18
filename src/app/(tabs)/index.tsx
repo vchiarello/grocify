@@ -1,79 +1,65 @@
-import { Show, useClerk, useUser } from "@clerk/expo";
-import { UserButton, UserProfileView } from "@clerk/expo/native";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import CompletedItems from "@/components/list/CompletedItems";
+import ListHeroCard from "@/components/list/ListHeroCard";
+import PendingItemCard from "@/components/list/PendingItemCard";
+import TabScreenBackground from "@/components/TabScreenBackground";
+import { useGroceryStore } from "@/store/grocery-store";
+import { FlatList, Text, View } from "react-native";
 
 /**
  * Home protetta: corrisponde alla rotta "/".
  * I gruppi tra parentesi non compaiono nell'URL, quindi (home)/index.tsx = "/".
  */
 export default function HomeScreen() {
-  const { user } = useUser();
-  const { signOut } = useClerk();
-
-  if (!user) return null;
-
+  const { items } = useGroceryStore();
+  const pendingItems = items.filter((item) => !item.isPurchased);
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Welcome</Text>
-      <Show when="signed-in">
-        <Text style={styles.text}>
-          Hello {user?.emailAddresses[0].emailAddress}
-        </Text>
-        <View style={styles.buttonContainer}>
-          <Pressable style={styles.button} onPress={() => signOut()}>
-            <Text style={styles.buttonText}>Sign Out</Text>
-          </Pressable>
+    <FlatList
+      className="flex-1 bg-background "
+      data={pendingItems}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => <PendingItemCard item={item} />}
+      contentContainerStyle={{ padding: 20, gap: 14 }}
+      contentInsetAdjustmentBehavior="automatic"
+      ListHeaderComponent={
+        <View style={{ gap: 14, paddingTop: 20 }}>
+          <TabScreenBackground />
+          <ListHeroCard />
+          <View className="flex-row items-center justify-between px-1">
+            <Text className="text-sm font-semibold uppercase tracking-[1px] text-muted-foreground">
+              Shopping items
+            </Text>
+            <Text className="text-sm text-muted-foreground">
+              {pendingItems.length} active
+            </Text>
+          </View>
         </View>
-        <View
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            overflow: "hidden",
-          }}
-        >
-          <UserButton />
-        </View>
-        <UserProfileView style={{ flex: 1 }} />
-      </Show>
-    </SafeAreaView>
+      }
+      ListFooterComponent={<CompletedItems />}
+    />
   );
 }
+//FIRST VERSION
+/*
+<ScrollView
+      className="flex-1 bg-background py-4"
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ padding: 20, gap: 14 }}
+    >
+      <TabScreenBackground />
+      <ListHeroCard />
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1 /* dice che il container occupa tutto lo spazio disponibile e ogni elemento occuperà lo stesso spazio */,
-    justifyContent:
-      "flex-start" /* allinea gli elementi all'inizio del contenitore lungo l'asse principale (verticale) */,
-    flexDirection:
-      "column" /* imposta la direzione degli elementi all'interno del contenitore come colonna (verticale) */,
-  },
-  title: {
-    textAlign: "center",
-    fontSize: 26,
-    fontWeight: "bold",
-  },
-  text: {
-    fontSize: 16,
-    fontWeight: "normal",
-    textAlign: "left",
-    padding: 10,
-  },
-  buttonContainer: {
-    width: "100%",
-    alignItems: "center",
-  },
-  button: {
-    backgroundColor: "#000",
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 10,
-    alignItems: "center",
-    width: 150,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-});
+      <View className="flex-row items-center justify-between px-1">
+        <Text className="text-sm font-semibold uppercase tracking-[1px] text-muted-foreground">
+          Shopping items
+        </Text>
+        <Text className="text-sm text-muted-foreground">
+          {pendingItems.length} active
+        </Text>
+      </View>
+      {pendingItems.map((item) => (
+        <PendingItemCard key={item.id} item={item} />
+      ))}
+      <CompletedItems />
+    </ScrollView>
+  
+*/

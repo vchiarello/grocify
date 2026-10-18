@@ -18,14 +18,14 @@ export default function TabsLayout() {
   const isDark = colorScheme === "dark";
   const tabTintColor = isDark ? "hsl(142, 70%, 54%)" : "hsl(147, 75%, 33%)";
 
+  useEffect(() => {
+    loadItems();
+  }, []);
+
   if (!isLoaded) return null;
 
   // Non autenticato (primo avvio, logout, sessione scaduta) → login
   if (!isSignedIn) return <Redirect href="/sign-in" />;
-
-  useEffect(() => {
-    loadItems();
-  }, []);
 
   return (
     <NativeTabs tintColor={tabTintColor}>

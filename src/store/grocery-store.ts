@@ -7,7 +7,7 @@ export type GroceryItem = {
   name: string;
   category: GroceryCategory;
   quantity: number;
-  purchased: boolean;
+  isPurchased: boolean;
   priority: GroceryPriority;
 };
 export type CreateItemInput = {
@@ -24,7 +24,7 @@ type GroceryStore = {
   error: string | null;
   loadItems: () => Promise<void>;
   addItem: (input: CreateItemInput) => Promise<GroceryItem | void>;
-  upddateQuantity: (id: string, quantity: number) => Promise<void>;
+  updateQuantity: (id: string, quantity: number) => Promise<void>;
   togglePurchased: (id: string) => Promise<void>;
   removeItem: (id: string) => Promise<void>;
   clearPurchased: () => Promise<void>;
@@ -72,17 +72,21 @@ export const useGroceryStore = create<GroceryStore>((set, get) => ({
       set({ error: "Something went wrong during adding an item." });
     }
   },
-  upddateQuantity: async (id, quantity) => {
+  updateQuantity: async (id, quantity) => {
+    console.log("update quantity:", id, quantity);
     const nextQuantity = Math.max(1, quantity);
     set({ error: null });
     try {
-      const res = await fetch("/api/items", {
+      console.log("Before fetch");
+      const res = await fetch(`/api/items/${id}`, {
         method: "PATCH",
         headers: { "Content-type": "application/json" },
         body: JSON.stringify({
           quantity: nextQuantity,
         }),
       });
+      console.log("after fetch");
+      console.log(res);
       const payload = (await res.json()) as ItemResponse;
       if (!res.ok) throw new Error(`Request failed (${res.status})`);
       set((state) => ({
@@ -96,9 +100,13 @@ export const useGroceryStore = create<GroceryStore>((set, get) => ({
     }
   },
   togglePurchased: async (id) => {
+    console.log("togglePurchased:", id);
     const currentItem = get().items.find((item) => item.id === id);
+    console.log("currentItem:", currentItem);
     if (!currentItem) return;
-    const nextPurchased = !currentItem.purchased;
+    const nextPurchased = !currentItem.isPurchased;
+    console.log("nextPurchased:", nextPurchased);
+
     set({ error: null });
     try {
       const res = await fetch(`/api/items/${id}`, {
@@ -109,6 +117,7 @@ export const useGroceryStore = create<GroceryStore>((set, get) => ({
         }),
       });
       const payload = (await res.json()) as ItemResponse;
+      console.log(payload);
       if (!res.ok) throw new Error(`Request failed (${res.status})`);
       set((state) => ({
         items: state.items.map((item) =>
@@ -143,7 +152,7 @@ export const useGroceryStore = create<GroceryStore>((set, get) => ({
       const res = await fetch("/api/items/clear-purchased", {
         method: "POST",
       });
-      const items = get().items.filter((item) => !item.purchased);
+      const items = get().items.filter((item) => !item.isPurchased);
       set({ items });
     } catch (error) {
       console.log("Error clear purchased", error);
